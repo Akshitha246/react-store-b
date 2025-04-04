@@ -1,79 +1,68 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
-
+import React from "react";
+import { useState } from "react";
+import "./Register.css";
+import { Link, useNavigate } from "react-router-dom";
+import { useContext } from "react";
+import { appContext } from "../App";
 export default function Register() {
-  const [details, setDetails] = useState([]); // Array for storing multiple users
-  const [detail, setDetail] = useState({ name: "", email: "", password: "" });
-
+  const { user, setUser, users, setUsers,cart } = useContext(appContext);
+  const [msg, setMsg] = useState();
+  const Navigate = useNavigate();
   const handleSubmit = () => {
-    if (detail.name && detail.email && detail.password) {
-      setDetails([...details, detail]);
-      setDetail({ name: "", email: "", password: "" }); // Reset form after submission
+    const found = users.find((value) => value.email === user.email);
+    if (found) {
+      setMsg("User already exists");
+    } else {
+      setUsers([...users, user]);
+      setMsg();
+      Object.keys(cart).length > 0 ? Navigate("/cart") : Navigate("/");
     }
   };
-
-  const handleDelete = (index) => {
-    setDetails(details.filter((_, i) => i !== index));
+  const handleDelete = (email) => {
+    setUsers(users.filter((value) => value.email != email));
   };
-
   return (
-    <div className="App-Row">
-      <h2>Registration Form</h2>
-      <p>
-        <input
-          type="text"
-          placeholder="Enter name"
-          value={detail.name}
-          onChange={(e) => setDetail({ ...detail, name: e.target.value })}
-        />
-      </p>
-      <p>
-        <input
-          type="text"
-          placeholder="Email address"
-          value={detail.email}
-          onChange={(e) => setDetail({ ...detail, email: e.target.value })}
-        />
-      </p>
-      <p>
-        <input
-          type="password"
-          placeholder="New password"
-          value={detail.password}
-          onChange={(e) => setDetail({ ...detail, password: e.target.value })}
-        />
-      </p>
-      <p>
-        <button onClick={handleSubmit}>Submit</button>
-      </p>
-
-      <h4>Registered Users</h4>
-      <table border={1}>
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Email</th>
-            <th>Password</th>
-            <th>Action</th>
-          </tr>
-        </thead>
-        <tbody>
-          {details.map((value, index) => (
-            <tr key={index}>
-              <td>{value.name}</td>
-              <td>{value.email}</td>
-              <td>{value.password}</td>
-              <td>
-                <button onClick={() => handleDelete(index)}>Delete</button>
-              </td>
-            </tr>
+    <div className="App-Register-Row">
+      <div>
+        <h2>Registration Form</h2>
+        {msg}
+        <p>
+          <input
+            type="text"
+            placeholder="Enter name"
+            onChange={(e) => setUser({ ...user, name: e.target.value })}
+          ></input>
+        </p>
+        <p>
+          <input
+            type="text"
+            placeholder="Email address"
+            onChange={(e) => setUser({ ...user, email: e.target.value })}
+          ></input>
+        </p>
+        <p>
+          <input
+            type="password"
+            placeholder="New password"
+            onChange={(e) => setUser({ ...user, password: e.target.value })}
+          ></input>
+        </p>
+        <p>
+          <button onClick={handleSubmit}>Submit</button>
+        </p>
+        <p>
+          <Link to="../login">Already a member? Log In</Link>
+        </p>
+      </div>
+      <div>
+        {users &&
+          users.map((value, index) => (
+            <li>
+              {value.name}-{value.email}-{value.password}
+              <button onClick={() => handleDelete(value.email)}>Delete</button>
+            </li>
           ))}
-        </tbody>
-      </table>
-
-      <p>
-        <Link to="../login">Already a member? Log In</Link>
-      </p>
+      </div>
     </div>
   );
 }
